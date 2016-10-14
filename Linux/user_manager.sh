@@ -1,87 +1,128 @@
 #!/bin/bash
-CONT="1"
-FIRST="1"
-                                                          
-while [ "$CONT" = "1" ] 
-do
-	clear
-	echo " ##############"
-	echo "| USER MANAGER |"
-	echo " ##############"
-	echo " "
-	if [ "$FIRST" != "1" ]; then
-		echo ""
-		echo "Check another user? (y/n): "
+
+##################
+#	User Manager
+
+edit_user() {
+	echo "Enter the name of the user to edit: "
+	read USR
+	
+	echo "Keep, Remove, or View Groups for this user? (k/r/g)"
+	read TMP
+	if [ $TMP = "k" ]; then
+		keep_user
+	
+	elif [ $TMP = "r" ]; then
+		remove_user
+
+	elif [ $TMP = "g" ]; then
+		view_groups
+	fi
+
+}
+
+keep_user() {
+	echo "Change user password? (y/n)"
+	read TMP
+	if [ $TMP = "y" ]; then
+		sudo passwd $USR
+	fi
+
+}
+
+add_user() {
+	echo "Enter the name of the user you want to add: "
+	read $USR
+	sudo adduser $USR
+}
+
+remove_user() {
+	echo "Are you sure you want to remove the user $USR? (y/n)"
+	read TMP
+	if [ $TMP = "y" ]; then
+		sudo deluser $USR
+	fi
+}
+
+view_groups() {
+	groups $USR
+	echo "Remove/add to groups or continue? (r/a/c)"
+	read TMP
+	if [ $TMP = "r" ]; then
+		echo "Enter the group you wish to remove the user from: "
 		read TMP
-		if [ "$TMP" = "n" ]; then
-			CONT="0"
-			break;
+		sudo deluser $USR $TMP
+		echo "View groups again? (y/n)"
+		read TMP
+		if [ $TMP = "y" ]; then
+			view_groups
 		fi
+	elif [ $TMP = "a" ]; then
+		echo "Enter the group you wish to add the user to: "
+		read TMP
+		sudo adduser $USR $TMP
+		echo "View groups again? (y/n)"
+		read TMP
+		if [ $TMP = "y" ]; then
+			view_groups
+		fi
+	elif [ $TMP = "c" ]; then
+		break
 	fi
-	FIRST="0"	
-		echo ""
-		echo "Enter the name of the user: "
-		read USR
-		getent passwd $USR > /dev/null
-		if [ $? = 0 ]; then
-			echo ""
-			echo "The user exists, these are the groups they belong to:"
-			groups $USR
-			echo ""
-			echo "Keep or delete this user?(k/d):"
-			read TMP
-			if [ "$TMP" = "d" ]; then
-				sudo deluser $USR
-			else
-				RAC=" "
-				while [ "$RAC" != "c" ]
-				do
-					echo ""
-					echo "Remove/Add from/to a group or Continue (r/a/c): "
-					read TMP
-					if [ "$TMP" = "r" ]; then
-						echo ""
-						echo "Enter the group you would like to remove them from (c to cancel): "
-						read GRP
-						if [ "$GRP" != "c" ]; then
-							sudo deluser $USR $GRP
-						fi
-						
-					elif [ "$TMP" = "a" ]; then
-						echo ""
-						echo "Enter the group you would like to add the user to (c to cancel): "
-						read GRP
-						if [ "$GRP" != "c" ]; then
-							sudo adduser $USR $GRP
-						fi
-					else
-						RAC="c"
-					fi
-				done
-			fi
-		else
-			echo ""
-			echo "This user does not exist. Would you like to add this user? (y/n): "
-			read TMP
-			if [ "$TMP" = "y" ]; then
-				sudo adduser $USR
-			
-				AC=" "
-				while [ "$AC" != "c" ]
-				do
-					echo ""
-					echo "Would you like to add this user to any groups? (y/n): "
-					read TMP
-					if [ "$TMP" = "y" ]; then
-						groups
-						echo ""
-						echo "Enter the group you would like to add the user to: "
-						read GRP
-						sudo adduser $USR $GRP
-					else
-						AC="c"
-					fi
-				done
-			fi	
+}
+
+user_manager() {
+	echo "This is a list of all the users: "
+	sudo cut -d: -f 1 /etc/passwd
+
+	UM="1"
+	while [ $UM = "1" ]
+	do
+		echo "Edit/Add a user or go back to the menu? (e/a/m)"
+		read TMP
+		if [ $TMP = "m" ]; then
+			UM="2"
+		elif [ $TMP = "e" ]; then
+			edit_user
+		elif [ $TMP = "a" ] ; then
+			add_user
+		fi
+	done
+	menu
+}
+
+#####################################################
+
+########
+# MP3 Search 
+find_mp3() {
+	sudo find /home -type f -name '*.mp3' >> ~/Desktop/mp3_results.txt
+	cat ~/Desktop/mp3_results.txt
+	menu
+}
+
+########
+
+########
+# Services
+
+menu() {
+	clear
+	echo "#    MENU     #"
+	echo " "
+	echo "1. User Manager"
+	echo "2. Search for MP3"
+	echo "3. View Services"
+
+	read TMP
+	if [ $TMP = "1" ]; then
+		user_manager
+	elif [ $TMP = "2" ]; then
+		find_mp3
+	elif [ $TMP = "3" ]; then
+		sudo ps -U root -u root -N
+		menu
 	fi
-done
+}
+
+menu
