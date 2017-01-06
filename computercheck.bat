@@ -85,6 +85,7 @@ echo Potential Armitage detected. Please take note, then press any key.
 pause >NUL
 )
 cls
+REM Metasploit may also very likely be named msf (Metasploit Framework) -Conner
 findstr "Metasploit" programfiles.flashed
 if %errorlevel%==0 (
 echo Potential Metasploit framework detected. Please take note, then press any key.
