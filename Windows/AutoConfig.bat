@@ -1,3 +1,5 @@
+REM Simple script for setting password policies in Windows. Working on auditing. -Conner
+
 @echo off
 echo Setting up password policies
 net accounts /minpwlen:7 /maxpwage:30 /minpwage:10 /uniquepw:1 /forcelogoff:no /lockoutduration:30 /lockoutthreshold:7 
