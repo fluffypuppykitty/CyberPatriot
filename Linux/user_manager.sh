@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Script for user management and other features. Likely to be scrapped. -Conner
+
 ##################
 #	User Manager
 
